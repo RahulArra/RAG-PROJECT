@@ -1,0 +1,11 @@
+venv/
+data/
+*.npy
+*.pkl
+__pycache__/
+*.pyc
+.env
+
+
+data/embeddings.npy
+data/documents.pkl
