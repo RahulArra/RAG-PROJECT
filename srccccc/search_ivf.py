@@ -45,7 +45,7 @@ faiss.normalize_L2(query_embedding)
 
 start = time.perf_counter()
 
-scores,indices = index.search(query_embedding,5)
+scores,indices = index.search(query_embedding,20)
 
 end = time.perf_counter()
 print("\nTOP 5 RESULTS:\n")

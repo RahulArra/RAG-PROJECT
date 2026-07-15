@@ -6,36 +6,47 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 
 
+# ----------------------------
+# Load documents
+# ----------------------------
+
 with open("data/documents.pkl", "rb") as f:
     documents = pickle.load(f)
 
-embeddings = np.load("data/embeddings.npy").astype("float32")
+
+# ----------------------------
+# Load FAISS index
+# ----------------------------
+
+index = faiss.read_index("data/faiss.index")
+
+
+# ----------------------------
+# Load embedding model
+# ----------------------------
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 
-# Normalize document vectors
-faiss.normalize_L2(embeddings)
-
-# Dimension = 384
-dimension = embeddings.shape[1]
-
-# Exact search using inner product
-index = faiss.IndexFlatIP(dimension)
-
-# Add all vectors to FAISS
-index.add(embeddings)
-
-print("Vectors in index:", index.ntotal)
-
+# ----------------------------
+# User Query
+# ----------------------------
 
 query = input("Enter your query: ")
 
-query_embedding = model.encode([query]).astype("float32")
 
-# Normalize query vector
+# ----------------------------
+# Create Query Embedding
+# ----------------------------
+
+query_embedding = model.encode([query]).astype(np.float32)
+
 faiss.normalize_L2(query_embedding)
 
+
+# ----------------------------
+# Search
+# ----------------------------
 
 start = time.perf_counter()
 
@@ -44,12 +55,21 @@ scores, indices = index.search(query_embedding, 5)
 end = time.perf_counter()
 
 
-print("\nTOP 5 RESULTS:\n")
+# ----------------------------
+# Display Results
+# ----------------------------
 
-for score, i in zip(scores[0], indices[0]):
-    print("Score:", score)
-    print("Document:", documents[i][:200])
-    print("-" * 50)
+print("\nTOP 5 RESULTS\n")
+
+for rank, (score, idx) in enumerate(zip(scores[0], indices[0]), start=1):
+
+    doc = documents[idx]
+
+    print(f"Rank : {rank}")
+    print(f"Score: {score:.4f}")
+    print(f"Title: {doc['title']}")
+    print(f"Body : {doc['body'][:300]}...")
+    print("-" * 80)
 
 
-print(f"\nSearch time: {(end - start) * 1000:.4f} ms")
+print(f"\nSearch Time: {(end-start)*1000:.4f} ms")
