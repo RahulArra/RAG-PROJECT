@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from datasets import load_dataset
 from sentence_transformers import SentenceTransformer
 
-sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
+sys.path.append(str(Path(__file__).resolve().parent))
 
 from models.document import Document
 
@@ -23,19 +23,16 @@ class DataPreparer:
         return soup.get_text(" ", strip=True)
 
     def prepare(self, limit):
-
         ds = load_dataset(
             "pacovaldez/stackoverflow-questions",
             split="train"
         )
-
         ds = ds.select(range(limit))
 
         documents = []
         texts = []
 
         for i, row in enumerate(ds):
-
             title = row["title"]
             body = self.clean_html(row["body"])
 
@@ -52,11 +49,7 @@ class DataPreparer:
 
         print(f"Loaded {len(documents)} documents")
 
-        embeddings = self.model.encode(
-            texts,
-            show_progress_bar=True
-        )
-
+        embeddings = self.model.encode(texts, show_progress_bar=True)
         embeddings = embeddings.astype(np.float32)
 
         return documents, embeddings

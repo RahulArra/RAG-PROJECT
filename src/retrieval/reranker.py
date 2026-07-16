@@ -10,7 +10,7 @@ class Reranker:
     def rerank(self, query, documents):
 
         pairs = [
-            (query, doc["text"])
+            (query, doc.text)
             for doc in documents
         ]
 

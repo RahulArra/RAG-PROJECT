@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 
 from embedding.embedder import Embedder
-from retrieval.faiss_index import FaissIndex
+from sse.src.retrieval.faiss_retriever import FaissIndex
 
 
 class Retriever:
