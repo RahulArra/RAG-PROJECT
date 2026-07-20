@@ -4,23 +4,19 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from bs4 import BeautifulSoup
 from datasets import load_dataset
-from sentence_transformers import SentenceTransformer
 
 sys.path.append(str(Path(__file__).resolve().parent))
 
+from embedding.embedder import Embedder
 from models.document import Document
+from utils.html_cleaner import clean_html
 
 
 class DataPreparer:
 
     def __init__(self, embedding_model="all-MiniLM-L6-v2"):
-        self.model = SentenceTransformer(embedding_model)
-
-    def clean_html(self, text):
-        soup = BeautifulSoup(text, "html.parser")
-        return soup.get_text(" ", strip=True)
+        self.embedder = Embedder(embedding_model)
 
     def prepare(self, limit):
         ds = load_dataset(
@@ -34,7 +30,7 @@ class DataPreparer:
 
         for i, row in enumerate(ds):
             title = row["title"]
-            body = self.clean_html(row["body"])
+            body = clean_html(row["body"])
 
             document = Document(
                 id=i,
@@ -49,7 +45,7 @@ class DataPreparer:
 
         print(f"Loaded {len(documents)} documents")
 
-        embeddings = self.model.encode(texts, show_progress_bar=True)
+        embeddings = self.embedder.encode(texts)
         embeddings = embeddings.astype(np.float32)
 
         return documents, embeddings

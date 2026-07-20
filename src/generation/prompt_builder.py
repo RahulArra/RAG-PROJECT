@@ -5,6 +5,11 @@ class PromptBuilder:
         context = ""
 
         for i, doc in enumerate(documents, start=1):
+            
+            # Truncate body to reduce prompt length and improve TTFT
+            body_text = doc.body
+            if len(body_text) > 800:
+                body_text = body_text[:800] + "... [truncated]"
 
             context += f"""
 Document {i}
@@ -13,7 +18,7 @@ Title:
 {doc.title}
 
 Body:
-{doc.body}
+{body_text}
 
 -------------------------
 

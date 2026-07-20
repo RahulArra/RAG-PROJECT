@@ -9,17 +9,21 @@ class LLM:
 
         self.model = "qwen3:8b"
 
-    def generate(self, prompt):
-
+    def generate_stream(self, prompt):
+        import json
         response = requests.post(
             self.url,
             json={
                 "model": self.model,
                 "prompt": prompt,
-                "stream": False
-            }
+                "stream": True
+            },
+            stream=True
         )
 
         response.raise_for_status()
 
-        return response.json()["response"]
+        for line in response.iter_lines():
+            if line:
+                chunk = json.loads(line)
+                yield chunk.get("response", "")
